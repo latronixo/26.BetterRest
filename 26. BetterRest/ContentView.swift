@@ -12,7 +12,7 @@ struct ContentView: View {
     @State private var wakeUp = Date.now    //даты просыпания
     
     var body: some View {
-        Text(Date.now, format: .dateTime.day().month().year())
+        Text(Date.now.formatted(date: .long, time: .shortened))
     }
     func exampleDates() {
 //        var components = DateComponents()
