@@ -17,8 +17,9 @@ struct ContentView: View {
     }
     
     func exampleDates() {
+        let now = Date.now
         let tomorrow = Date.now.addingTimeInterval(86400)
-        let range = Date.now...tomorrow
+        let range = now...tomorrow
     }
 }
 
