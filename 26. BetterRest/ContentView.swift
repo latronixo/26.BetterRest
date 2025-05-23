@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @State private var wakeUp = Date.now    //дата просыпания (при открытии приложения = текущее время)
+    @State private var wakeUp = defaultWakeTime    //дата просыпания (при открытии приложения = 7:00)
     @State private var sleepAmount = 8.0    //продолжительность сна
     @State private var coffeeAmount = 1     //количество выпитых чашек кофе в течение дня
     
@@ -18,24 +18,37 @@ struct ContentView: View {
     @State private var alertMessage = ""
     @State private var showingAlert = false
     
+    static var defaultWakeTime: Date {
+        var components = DateComponents()
+        components.hour = 7
+        components.minute = 0
+        return Calendar.current.date(from: components) ?? .now
+    }
+    
     var body: some View {
         NavigationStack{
-            VStack {
-                Text("Когда ты хочешь проснуться?")
-                    .font(.headline)
-                
-                DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
-                
-                Text("Желаемое количество сна")
-                    .font(.headline)
-                
-                Stepper("\(sleepAmount.formatted()) hours", value: $sleepAmount, in: 4...12, step: 0.25)
-                
-                Text("Ежедневное потребление кофе")
-                    .font(.headline)
-                
-                Stepper("\(coffeeAmount) cup(s)", value: $coffeeAmount, in: 1...20)
+            Form {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Когда ты хочешь проснуться?")
+                        .font(.headline)
+                    
+                    DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                }
+
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Желаемое длительность сна")
+                        .font(.headline)
+                    
+                    Stepper("\(sleepAmount.formatted()) hours", value: $sleepAmount, in: 4...12, step: 0.25)
+                }
+
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Ежедневное потребление кофе")
+                        .font(.headline)
+                    
+                    Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 1...20)
+                }
             }
             .navigationTitle("Лучший отдых")
             .toolbar {
