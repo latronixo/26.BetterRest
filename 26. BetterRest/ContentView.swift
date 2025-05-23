@@ -10,19 +10,39 @@ import SwiftUI
 struct ContentView: View {
     
     @State private var wakeUp = Date.now    //даты просыпания
+    @State private var sleepAmount = 8.0    //продолжительность сна
+    @State private var coffeeAmount = 1     //количество выпитых чашек кофе в течение дня
     
     var body: some View {
-        Text(Date.now.formatted(date: .long, time: .shortened))
-    }
-    func exampleDates() {
-//        var components = DateComponents()
-//        components.hour = 8
-//        components.minute = 0
-//        let date = Calendar.current.date(from: components) ?? .now
+        NavigationStack{
+            VStack {
+                Text("When do you want to wake up?")
+                    .font(.headline)
+                
+                DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
+                    .labelsHidden()
+                
+                Text("Desired amount of sleep")
+                    .font(.headline)
+                
+                Stepper("\(sleepAmount.formatted()) hours", value: $sleepAmount, in: 4...12, step: 0.25)
+                
+                Text("Daile coffee instake")
+                    .font(.headline)
+                
+                Stepper("\(coffeeAmount) cup(s)", value: $coffeeAmount, in: 1...20)
+            }
+            .navigationTitle("BetterRest")
+            .toolbar {
+                Button("Calculate", action: calculateBedtime)
+                
+            }
+        }
         
-        let components = Calendar.current.dateComponents([.hour, .minute], from: .now)
-        let hour = components.hour ?? 0
-        let minute = components.minute
+    }
+    
+    func calculateBedtime() {
+        
     }
 }
 
