@@ -12,7 +12,7 @@ struct ContentView: View {
     
     @State private var wakeUp = defaultWakeTime    //дата просыпания (при открытии приложения = 7:00)
     @State private var sleepAmount = 8.0    //продолжительность сна
-    @State private var coffeeAmount = 1     //количество выпитых чашек кофе в течение дня
+    @State private var coffeeAmount = 0     //количество выпитых чашек кофе в течение дня
     
     @State private var alertTitle = ""
     @State private var alertMessage = ""
@@ -47,7 +47,7 @@ struct ContentView: View {
                     Text("Ежедневное потребление кофе")
                         .font(.headline)
                     
-                    Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 1...20)
+                    Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 0...20)
                 }
             }
             .navigationTitle("Лучший отдых")
@@ -82,7 +82,7 @@ struct ContentView: View {
             //время отхода ко сну = время просыпания - нужная длительность сна
             let sleepTime = wakeUp - prediction.actualSleep
             
-            alertTitle = "Your ideal bedtime is..."
+            alertTitle = "Твое идеальное время отхода ко сну..."
             alertMessage = sleepTime.formatted(date: .omitted, time: .shortened)
         } catch {
             alertTitle = "Error"
