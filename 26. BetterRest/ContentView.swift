@@ -44,11 +44,16 @@ struct ContentView: View {
                 }
 
                 Section {
-                    Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 0...20)
-                } header: {
-                    Text("Ежедневное потребление кофе")
-                        .font(.headline)
-                }
+                    Picker("Дневное потребление кофе", selection: $coffeeAmount) {
+                        ForEach(0...20, id: \.self) {
+                            Text("^[\($0) cup](inflect: true)")
+                        }
+                    }
+                    .pickerStyle(.menu)
+                } //header: {
+                    //Text("Ежедневное потребление кофе")
+                      //  .font(.headline)
+                //}
             }
             .navigationTitle("Лучший отдых")
             .toolbar {
