@@ -25,6 +25,49 @@ struct ContentView: View {
         return Calendar.current.date(from: components) ?? .now
     }
     
+    private var goingToBed: Date {
+        get {
+            do {
+                let config = MLModelConfiguration()
+                let model = try SleepCalculator(configuration: config)
+                
+                //рассчитываем, сколько осталось времени до подъема (в часах и минутах)
+                let components = Calendar.current.dateComponents([.hour, .minute], from: wakeUp)
+                //переводим часы (составляющую от времени просыпания) в секунды
+                let hour = (components.hour ?? 0) * 60 * 60
+                //переводим минуты (составляющую от времени просыпания) в секунды
+                let minute = (components.minute ?? 0) * 60
+                
+                //на основе машинного обучения ML получаем, какая длительность сна нужна для лучшего отдыха
+                let prediction = try model.prediction(wake: Double(hour + minute), estimatedSleep: sleepAmount, coffee: Double(coffeeAmount))
+                
+                //время отхода ко сну = время просыпания - нужная длительность сна
+                let sleepTime = wakeUp - prediction.actualSleep
+                
+                return sleepTime
+            } catch {
+                // Логирование ошибки
+                print("⚠️ Ошибка при расчете времени сна: \(error.localizedDescription)")
+                
+                // Отладочная информация
+                #if DEBUG
+                print("""
+                Детали ошибки:
+                - Время пробуждения: \(wakeUp)
+                - Продолжительность сна: \(sleepAmount) часов
+                - Чашек кофе: \(coffeeAmount)
+                """)
+                #endif
+                
+                // Возвращаем fallback-значение с предупреждением
+                let fallbackTime = wakeUp - sleepAmount
+                print("⚠️ Используется fallback время: \(fallbackTime)")
+                
+                return fallbackTime
+            }
+        }
+    }
+    
     var body: some View {
         NavigationStack{
             Form {
@@ -44,56 +87,23 @@ struct ContentView: View {
                 }
 
                 Section {
-                    Picker("Дневное потребление кофе", selection: $coffeeAmount) {
+                    Picker("Кофе выпито в течение дня", selection: $coffeeAmount) {
                         ForEach(0...20, id: \.self) {
                             Text("^[\($0) cup](inflect: true)")
                         }
                     }
-                    .pickerStyle(.menu)
-                } //header: {
-                    //Text("Ежедневное потребление кофе")
-                      //  .font(.headline)
-                //}
+                }
+                
+                Section {
+                    Text(goingToBed.formatted(date: .omitted, time: .shortened))
+                        .font(.largeTitle)
+                } header: {
+                    Text("Твое идеальное время отхода ко сну:")
+                        .font(.headline)
+                }
             }
             .navigationTitle("Лучший отдых")
-            .toolbar {
-                Button("Рассчитать", action: calculateBedtime)
-                
-            }
-            .alert(alertTitle, isPresented: $showingAlert) {
-                Button("OK") { }
-            } message: {
-                Text(alertMessage)
-            }
         }
-        
-    }
-    
-    func calculateBedtime() {
-        do {
-            let config = MLModelConfiguration()
-            let model = try SleepCalculator(configuration: config)
-            
-            //рассчитываем, сколько осталось времени до подъема (в часах и минутах)
-            let components = Calendar.current.dateComponents([.hour, .minute], from: wakeUp)
-            //переводим часы (составляющую от времени просыпания) в секунды
-            let hour = (components.hour ?? 0) * 60 * 60
-            //переводим минуты (составляющую от времени просыпания) в секунды
-            let minute = (components.minute ?? 0) * 60
-            
-            //на основе машинного обучения ML получаем, какая длительность сна нужна для лучшего отдыха
-            let prediction = try model.prediction(wake: Double(hour + minute), estimatedSleep: sleepAmount, coffee: Double(coffeeAmount))
-            
-            //время отхода ко сну = время просыпания - нужная длительность сна
-            let sleepTime = wakeUp - prediction.actualSleep
-            
-            alertTitle = "Твое идеальное время отхода ко сну..."
-            alertMessage = sleepTime.formatted(date: .omitted, time: .shortened)
-        } catch {
-            alertTitle = "Error"
-             alertMessage = "Sorry, there was a problem calculating your bedtime"
-        }
-        showingAlert = true
     }
 }
 
